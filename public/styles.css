@@ -1,0 +1,32 @@
+  body {
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        .user-card {
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+        }
+        .stats-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .stat-box {
+            border: 1px solid #eee;
+            padding: 10px;
+            border-radius: 5px;
+            min-width: 200px;
+        }
+        .loading {
+            text-align: center;
+            padding: 20px;
+        }
+        .points-calculation {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
