@@ -7,13 +7,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchBtn = document.getElementById('searchBtn');
     const viewToggle = document.getElementById('viewToggle');
     
-    let currentView = 'cards'; // 'cards' or 'table'
+    let currentView = 'table'; // 'cards' or 'table'
     let allUsersData = []; // This will store all loaded data
     let filteredUsersData = []; // This will store filtered data for searches
     
     // Initialize toggle switch
     viewToggle.addEventListener('change', function() {
-        currentView = this.checked ? 'table' : 'cards';
+        currentView = this.checked ? 'cards' : 'table';
         updateView();
     });
     
@@ -41,32 +41,45 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Sort functionality
-    document.getElementById('sortSelect').addEventListener('change', function() {
-        const sortValue = this.value;
-        if (!sortValue) {
-            filteredUsersData = [...allUsersData];
-        } else {
-            const [field, order] = sortValue.split('-');
-            filteredUsersData.sort((a, b) => {
-                const aData = a.skillRackData || {};
-                const bData = b.skillRackData || {};
-                
-                let aValue, bValue;
-                
-                if (field === 'points') {
-                    aValue = aData.pointsCalculation?.totalPoints || 0;
-                    bValue = bData.pointsCalculation?.totalPoints || 0;
-                } else { // count
-                    aValue = aData.programCounts?.programsSolved || 0;
-                    bValue = bData.programCounts?.programsSolved || 0;
-                }
-                
-                return order === 'desc' ? bValue - aValue : aValue - bValue;
-            });
-        }
-        updateView();
-    });
+// Sort functionality
+document.getElementById('sortSelect').addEventListener('change', function() {
+    const sortValue = this.value;
+    if (!sortValue) {
+        filteredUsersData = [...allUsersData];
+    } else {
+        const [field, order] = sortValue.split('-');
+        filteredUsersData.sort((a, b) => {
+            // Get skillRackData or empty object if not available
+            const aData = a.skillRackData || {};
+            const bData = b.skillRackData || {};
+            
+            let aValue, bValue;
+            
+            if (field === 'points') {
+                // More robust points calculation access
+                aValue = (typeof aData.pointsCalculation === 'object' && aData.pointsCalculation !== null) 
+                    ? (aData.pointsCalculation.totalPoints || 0) 
+                    : 0;
+                bValue = (typeof bData.pointsCalculation === 'object' && bData.pointsCalculation !== null) 
+                    ? (bData.pointsCalculation.totalPoints || 0) 
+                    : 0;
+            } else { // count
+                // More robust program counts access
+                aValue = (typeof aData.programCounts === 'object' && aData.programCounts !== null) 
+                    ? (aData.programCounts.programsSolved || 0) 
+                    : 0;
+                bValue = (typeof bData.programCounts === 'object' && bData.programCounts !== null) 
+                    ? (bData.programCounts.programsSolved || 0) 
+                    : 0;
+            }
+            
+            console.log(`Sorting: aValue=${aValue}, bValue=${bValue}, field=${field}, order=${order}`);
+            
+            return order === 'desc' ? bValue - aValue : aValue - bValue;
+        });
+    }
+    updateView();
+});
     
     // Load all users initially (but don't load SkillRack data yet)
     fetchBasicUserData();
