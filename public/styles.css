@@ -1,5 +1,15 @@
 /* Old Styles */
-
+        @keyframes anime-rotate {
+            from{
+                transform: rotate(0);
+            }
+            to{
+                transform: rotate(360deg);
+            }
+        }
+        .rotate{
+            animation: anime-rotate infinite;
+        }
         .user-card {
             margin-bottom: 20px;
             border: 1px solid #ddd;

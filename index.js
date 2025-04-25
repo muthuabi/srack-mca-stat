@@ -2,13 +2,17 @@ const express = require('express');
 const axios = require('axios');
 const { JSDOM } = require('jsdom');
 const path = require('path');
+const dotenv = require('dotenv');
+const fs = require("fs");
+const CryptoJS = require("crypto-js");
 const app = express();
-// Serve static files from the public directory
+dotenv.config();
 app.use(express.static(path.join(__dirname, 'public')));
-// Parse JSON bodies
 app.use(express.json());
-const users= require("./data/data.json");
-// Function to extract data from HTML (same as before)
+const encryptedData = fs.readFileSync("./data/data.enc", "utf8");
+const decrypted = CryptoJS.AES.decrypt(encryptedData, process.env.CIPHER_KEY).toString(CryptoJS.enc.Utf8);
+const users=JSON.parse(decrypted);
+// const users= require("./data/data.json");
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }

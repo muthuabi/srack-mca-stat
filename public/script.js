@@ -55,7 +55,7 @@ document.getElementById('sortSelect').addEventListener('change', function() {
             
             let aValue, bValue;
             
-            if (field === 'points') {
+            if (field === "points") {
                 // More robust points calculation access
                 aValue = (typeof aData.pointsCalculation === 'object' && aData.pointsCalculation !== null) 
                     ? (aData.pointsCalculation.totalPoints || 0) 
@@ -205,8 +205,13 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                                 <p class="text-muted"><strong>Reg No:</strong> ${user.registerNumber}</p>
                             </div>
                             <span class="badge rank-badge">Rank: ${skillRackData.programmingSummary?.rank || 'N/A'}</span>
+                         
                         </div>
-                        
+                        <button title="refresh" class="btn btn-sm btn-info mt-2 load-skillrack-btn" data-reg="${user.registerNumber}">
+                            <i class="bi bi-arrow-repeat"></i>
+                            Reload Stats
+                        </button>
+                        <div class="skillrack-data" id="data-${user.registerNumber}" style="display: none;"></div>
                         <div class="my-2">
                             <p class="mb-1"><strong>Program:</strong> ${skillRackData.basicInfo?.program || 'N/A'}</p>
                             <p class="mb-1"><strong>College:</strong> ${skillRackData.basicInfo?.college || 'N/A'}</p>
@@ -339,8 +344,9 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                         <i class="bi bi-box-arrow-up-right"></i>
                     </a>
                     <button class="btn btn-sm btn-info load-skillrack-btn" data-reg="${user.registerNumber}">
-                        <i class="bi bi-arrow-repeat"></i>
+                        <i class="bi bi-arrow-repeat rotLoader" id="data-${user.registerNumber}"></i>
                     </button>
+                    
                 </td>
             `;
             tbody.appendChild(row);
@@ -363,6 +369,9 @@ document.getElementById('sortSelect').addEventListener('change', function() {
         const dataContainer = document.querySelector(`#data-${registerNumber}`);
         if (dataContainer) {
             dataContainer.style.display = 'block';
+            if(dataContainer.classList.contains("rotLoader"))
+                dataContainer.innerHTML="<small>Loading...</small>";
+            else
             dataContainer.innerHTML = '<p>Loading data...</p>';
         }
         
@@ -404,12 +413,18 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                     updateView();
                 } else {
                     if (dataContainer) {
+                        if(dataContainer.classList.contains("rotLoader"))
+                            dataContainer.innerHTML="<small>Failed</small>";
+                        else
                         dataContainer.innerHTML = '<div class="alert alert-danger">Failed to load SkillRack data</div>';
                     }
                 }
             })
             .catch(error => {
                 if (dataContainer) {
+                    if(dataContainer.classList.contains("rotLoader"))
+                        dataContainer.innerHTML="<small>Error</small>";
+                    else
                     dataContainer.innerHTML = '<div class="alert alert-danger">Error loading data</div>';
                 }
                 console.error('Error:', error);
