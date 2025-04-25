@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillRack Data Viewer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+     <link rel="stylesheet" href="styles.css">
+     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</head>
+<style>
+   .form-container
+   {
+      display: flex;
+      justify-content: center;
+   }
+   .form#srack-url-form
+   {
+      display: flex;
+      flex-direction: column;
+      gap:10px;
+      width:min(700px,100%);
+   }
+   .user-container
+   {
+      display: flex;
+      justify-content: center;
+
+   }
+   .user-card
+   {
+      width:min(700px,100%);
+   }
+</style>
+<body>
+      <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="text-center mb-0">SkillRack Stat Viewer</h1>
+         </div>
+         <div class="card mb-4 main-container ">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Individual User</h3>
+            </div>
+            <div class="px-3">
+            <div class="card-body form-container px-3">
+               <form class="form card p-3" id="srack-url-form">
+                     <div class='form-group'>
+                        <label class='px-1 my-1'><strong>Paste your SkillRack URL</strong></label>
+                        <div class="input-group input-group">
+                             <span class="input-group-text" id="inputGroup-sizing">URL</span>
+                             <input type="url" id="input-srack-url" class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-lg" required />
+                        </div>
+                     </div>
+                     <button type='submit' class='btn btn-primary'>Fetch Stat</button>
+               </form>
+            </div>
+            <div id="user-container" class="user-container">
+
+            </div>
+            <div>
+         </div>
+
+      </div>
+      <script>
+
+
+      document.addEventListener("DOMContentLoaded",(event)=>{
+               const userContainer=document.getElementById("user-container");
+               const userForm=document.getElementById("srack-url-form");
+               const urlInput=document.getElementById("input-srack-url");
+               let URL;
+               const loaderHTML=`   
+               <div id="loadingIndicator" class="loading" style="display: flex;justify-content:center;width:100%;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading data...</p>
+                </div>`;
+               function fetchSRackData(message="")
+               {
+                     URL=urlInput?.value || localStorage.getItem("savedSrackURL") || null;
+                     URL=URL?.trim();
+                     userContainer.innerHTML=loaderHTML;
+                     if(!URL)
+                     {
+                        userContainer.innerHTML=`<div class="mt-3 alert alert-warning"><strong>No URL FOUND</strong></div>`;
+                        return;
+                     }
+                     fetch(`/api/user/srack-url?url=${btoa(URL)}`)
+                     .then(res=>res.json())
+                     .then(data=>{
+                        // console.log(data);
+                        // if(data?.skillRackData || null)
+                        //    throw new Error("Some Error Occured");
+                        userContainer.innerHTML=getUserDataCard(data.skillRackData,message);
+                        localStorage.setItem("savedSrackURL",URL);
+                        document.getElementById("reload-stat").addEventListener("click",reloadStat);
+                     })
+                     .catch(err=>{
+                        // console.log(err);
+                        userContainer.innerHTML=`<div class="mt-3 alert alert-danger"><strong>Failed to Load SkillRack Data (Invalid URL | Server Problem | Internet Issue)</strong></div>`;
+                     })
+                     .finally(()=>{
+                           console.log("Fetch Completed");
+                     });
+                     console.log(URL);
+               }
+               if(localStorage.getItem("savedSrackURL"))
+                  fetchSRackData(`<span>Welcome Back!</span>`);
+
+               userForm.addEventListener("submit",(e)=>{
+                     e.preventDefault();
+                     fetchSRackData();
+               });
+               function reloadStat()
+               {
+                  fetchSRackData(`<span>Stats Loaded | Updated !</span>`);
+               }
+               function getUserDataCard(skillRackData,message="")
+               {
+               const userCard = document.createElement('div');
+               let languagesHTML = '';
+                if (skillRackData.languageStats) {
+                    for (const [lang, count] of Object.entries(skillRackData.languageStats)) {
+                        languagesHTML += `<span class="badge bg-secondary badge-language">${lang.toUpperCase()}: ${count}</span>`;
+                    }
+                }
+                userCard.innerHTML = `
+                    <div class="user-card">
+                        ${message}
+                        <div class="d-flex justify-content-between align-items-start">
+
+                            <div>
+                                <h4>${skillRackData.basicInfo?.name || 'N/A'}</h4>
+                                <p class="text-muted"><strong>Reg No:</strong> ${skillRackData.basicInfo?.registerNumber}</p>
+                            </div>
+                            <span class="badge rank-badge">Rank: ${skillRackData.programmingSummary?.rank || 'N/A'}</span>
+                         
+                        </div>
+                        <button type='button' title="refresh" id="reload-stat"  class="btn btn-sm btn-info mt-2 load-skillrack-btn" data-reg="${skillRackData.basicInfo?.registerNumber}">
+                            <i class="bi bi-arrow-repeat"></i>
+                            Reload Stats
+                        </button>
+                        <div class="skillrack-data" id="data-${skillRackData.basicInfo?.registerNumber}" style="display: none;"></div>
+                        <div class="my-2">
+                            <p class="mb-1"><strong>Program:</strong> ${skillRackData.basicInfo?.program || 'N/A'}</p>
+                            <p class="mb-1" style='white-space:nowrap;overflow: hidden;
+  text-overflow: ellipsis;' title="${skillRackData.basicInfo?.college || 'N/A'}" ><strong>College: </strong>${skillRackData.basicInfo?.college || 'N/A'}</p>
+                            <p class="mb-1"><strong>Year:</strong> ${skillRackData.basicInfo?.year || 'N/A'}</p>
+                        </div>
+                        
+                        <a href="${skillRackData.basicInfo?.skillRackURL}" target="_blank" class="btn btn-sm btn-outline-primary mb-3">
+                            <i class="bi bi-box-arrow-up-right"></i> SkillRack Profile
+                        </a>
+                        
+                        <!-- Always visible important stats -->
+                        <div class="stats-container">
+                            <div class="stat-box">
+                                <h5><i class="bi bi-code-square"></i> Programs Solved</h5>
+                                <p class="fs-4 fw-bold" >${skillRackData.programCounts?.programsSolved || 0}</p>
+                            </div>
+                            
+                            <div class="stat-box">
+                                <h5><i class="bi bi-graph-up"></i> Total Points</h5>
+                                <p class="fs-4 fw-bold" >${skillRackData.pointsCalculation?.points || 0}</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Accordion for additional details -->
+                        <div class="accordion mt-3" id="accordion-${skillRackData.basicInfo?.registerNumber}">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
+                                        data-bs-target="#collapse-${skillRackData.basicInfo?.registerNumber}" aria-expanded="false" 
+                                        aria-controls="collapse-${skillRackData.basicInfo?.registerNumber}">
+                                        Show Details
+                                    </button>
+                                </h2>
+                                <div id="collapse-${skillRackData.basicInfo?.registerNumber}" class="accordion-collapse collapse" 
+                                    data-bs-parent="#accordion-${skillRackData.basicInfo?.registerNumber}">
+                                    <div class="accordion-body">
+                                         <div class="stat-box">
+
+                                            <h5><i class="bi bi-award"></i> Medals</h5>
+                                            <p><strong>Code Tutor:</strong> ${skillRackData.pointsCalculation?.codeTutor || 0}</p>
+                                            <p><strong>Code Track:</strong> ${skillRackData.pointsCalculation?.codeTrack || 0}</p>
+                                            <p><strong>DC</strong> ${skillRackData.pointsCalculation?.dc || 0}</p>
+                                            <p><strong>DT:</strong> ${skillRackData.pointsCalculation?.dt || 0}</p>
+                                            <p><strong>Code Test:</strong> ${skillRackData.pointsCalculation?.codeTest || 0}</p>
+                                           
+                                        </div>
+                                        <div class="stat-box">
+                                            <h5><i class="bi bi-award"></i> Medals</h5>
+                                            <p><i class="bi bi-trophy-fill medal-gold"></i> <strong>Gold:</strong> ${skillRackData.programmingSummary?.medals?.gold || 0}</p>
+                                            <p><i class="bi bi-trophy-fill medal-silver"></i> <strong>Silver:</strong> ${skillRackData.programmingSummary?.medals?.silver || 0}</p>
+                                            <p><i class="bi bi-trophy-fill medal-bronze"></i> <strong>Bronze:</strong> ${skillRackData.programmingSummary?.medals?.bronze || 0}</p>
+                                        </div>
+                                        
+                                        <div class="stat-box">
+                                            <h5><i class="bi bi-code-slash"></i> Program Types</h5>
+                                            <p><strong>Code Test:</strong> ${skillRackData.programCounts?.codeTest || 0}</p>
+                                            <p><strong>Code Track:</strong> ${skillRackData.programCounts?.codeTrack || 0}</p>
+                                            <p><strong>Code Tutor:</strong> ${skillRackData.programCounts?.codeTutor || 0}</p>
+                                        </div>
+                                        
+                                        <div class="stat-box">
+                                            <h5><i class="bi bi-filetype-js"></i> Languages</h5>
+                                            ${languagesHTML || '<p>No language data</p>'}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return userCard.innerHTML;
+               }
+
+
+
+      });
+      </script>
+</body>
+</html>

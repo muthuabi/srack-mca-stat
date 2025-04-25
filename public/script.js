@@ -52,16 +52,14 @@ document.getElementById('sortSelect').addEventListener('change', function() {
             // Get skillRackData or empty object if not available
             const aData = a.skillRackData || {};
             const bData = b.skillRackData || {};
-            
             let aValue, bValue;
-            
             if (field === "points") {
                 // More robust points calculation access
                 aValue = (typeof aData.pointsCalculation === 'object' && aData.pointsCalculation !== null) 
-                    ? (aData.pointsCalculation.totalPoints || 0) 
+                    ? (aData.pointsCalculation.points || 0) 
                     : 0;
                 bValue = (typeof bData.pointsCalculation === 'object' && bData.pointsCalculation !== null) 
-                    ? (bData.pointsCalculation.totalPoints || 0) 
+                    ? (bData.pointsCalculation.points || 0) 
                     : 0;
             } else { // count
                 // More robust program counts access
@@ -73,7 +71,7 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                     : 0;
             }
             
-            console.log(`Sorting: aValue=${aValue}, bValue=${bValue}, field=${field}, order=${order}`);
+            // console.log(`Sorting: aValue=${aValue}, bValue=${bValue}, field=${field}, order=${order}`);
             
             return order === 'desc' ? bValue - aValue : aValue - bValue;
         });
@@ -91,7 +89,7 @@ document.getElementById('sortSelect').addEventListener('change', function() {
     
     // Search functionality (now works on already loaded data)
     searchBtn.addEventListener('click', function() {
-        const searchTerm = searchInput.value.toLowerCase();
+        const searchTerm = searchInput.value.toLowerCase().trim();
         if (!searchTerm) {
             filteredUsersData = [...allUsersData]; // Reset to all data if search is empty
         } else {
@@ -107,15 +105,38 @@ document.getElementById('sortSelect').addEventListener('change', function() {
         }
         updateView();
     });
-    
+    function getLocal(key="srack_data")
+    {
+        const data=localStorage.getItem("srack_data");
+        if(!data)
+            return false;
+        allUsersData = JSON.parse(atob(data));
+        filteredUsersData = [...allUsersData];
+        updateView();
+        return true;
+
+    }
+    function storeLocal(userData)
+    {
+        if(userData)
+        {
+        // console.log("Local Set");
+        localStorage.setItem("srack_data",btoa(JSON.stringify(userData)));
+        }
+    }
+
     function fetchBasicUserData() {
+        if(getLocal())
+            return;
         loadingIndicator.style.display = 'block';
         usersContainer.style.display='none';
         fetch('/api/users')
             .then(response => response.json())
             .then(users => {
                 // Initialize with basic user data (no SkillRack data yet)
+                
                 allUsersData = users.map(user => ({ user }));
+                storeLocal(allUsersData);
                 filteredUsersData = [...allUsersData];
                 updateView();
             })
@@ -135,6 +156,7 @@ document.getElementById('sortSelect').addEventListener('change', function() {
             .then(response => response.json())
             .then(data => {
                 allUsersData = data;
+                storeLocal(allUsersData);
                 filteredUsersData = [...allUsersData];
                 updateView();
             })
@@ -214,7 +236,8 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                         <div class="skillrack-data" id="data-${user.registerNumber}" style="display: none;"></div>
                         <div class="my-2">
                             <p class="mb-1"><strong>Program:</strong> ${skillRackData.basicInfo?.program || 'N/A'}</p>
-                            <p class="mb-1"><strong>College:</strong> ${skillRackData.basicInfo?.college || 'N/A'}</p>
+                            <p class="mb-1" style='white-space:nowrap;overflow: hidden;
+  text-overflow: ellipsis;' title="${skillRackData.basicInfo.college || 'N/A'}" ><strong>College: </strong>${skillRackData.basicInfo?.college || 'N/A'}</p>
                             <p class="mb-1"><strong>Year:</strong> ${skillRackData.basicInfo?.year || 'N/A'}</p>
                         </div>
                         
@@ -226,12 +249,12 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                         <div class="stats-container">
                             <div class="stat-box">
                                 <h5><i class="bi bi-code-square"></i> Programs Solved</h5>
-                                <p class="fs-4 fw-bold">${skillRackData.programCounts?.programsSolved || 0}</p>
+                                <p class="fs-4 fw-bold" ${skillRackData.programCounts?.programsSolved>=1000 && "style='color:green'" } >${skillRackData.programCounts?.programsSolved || 0}</p>
                             </div>
                             
                             <div class="stat-box">
                                 <h5><i class="bi bi-graph-up"></i> Total Points</h5>
-                                <p class="fs-4 fw-bold">${skillRackData.pointsCalculation?.totalPoints || 0}</p>
+                                <p class="fs-4 fw-bold" >${skillRackData.pointsCalculation?.totalPoints || 0}</p>
                             </div>
                         </div>
                         
@@ -248,6 +271,16 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                                 <div id="collapse-${user.registerNumber}" class="accordion-collapse collapse" 
                                     data-bs-parent="#accordion-${user.registerNumber}">
                                     <div class="accordion-body">
+                                         <div class="stat-box">
+
+                                            <h5><i class="bi bi-award"></i> Medals</h5>
+                                            <p><strong>Code Tutor:</strong> ${skillRackData.pointsCalculation?.codeTutor || 0}</p>
+                                            <p><strong>Code Track:</strong> ${skillRackData.pointsCalculation?.codeTrack || 0}</p>
+                                            <p><strong>DC</strong> ${skillRackData.pointsCalculation?.dc || 0}</p>
+                                            <p><strong>DT:</strong> ${skillRackData.pointsCalculation?.dt || 0}</p>
+                                            <p><strong>Code Test:</strong> ${skillRackData.pointsCalculation?.codeTest || 0}</p>
+                                            <p><strong>Total Points</strong> ${skillRackData.pointsCalculation?.totalPoints || 0}</p>
+                                        </div>
                                         <div class="stat-box">
                                             <h5><i class="bi bi-award"></i> Medals</h5>
                                             <p><i class="bi bi-trophy-fill medal-gold"></i> <strong>Gold:</strong> ${skillRackData.programmingSummary?.medals?.gold || 0}</p>
@@ -259,6 +292,7 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                                             <h5><i class="bi bi-code-slash"></i> Program Types</h5>
                                             <p><strong>Code Test:</strong> ${skillRackData.programCounts?.codeTest || 0}</p>
                                             <p><strong>Code Track:</strong> ${skillRackData.programCounts?.codeTrack || 0}</p>
+                                            <p><strong>Code Tutor:</strong> ${skillRackData.programCounts?.codeTutor || 0}</p>
                                         </div>
                                         
                                         <div class="stat-box">
@@ -310,7 +344,7 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                 <th>Gold</th>
                 <th>Silver</th>
                 <th>Bronze</th>
-                <th>Total Points</th>
+                <th>Points</th>
                 <th>Actions</th>
             </tr>
         `;
@@ -332,7 +366,8 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                 <td>${basicInfo.name || 'N/A'}</td>
                 <td>${user.registerNumber}</td>
                 <td>${basicInfo.program || 'N/A'}</td>
-                <td>${basicInfo.college || 'N/A'}</td>
+                <td style='white-space:nowrap;max-width:10px;overflow: hidden;
+  text-overflow: ellipsis;' title="${basicInfo.college || 'N/A'}">${basicInfo.college || 'N/A'}</td>
                 <td>${programmingSummary.rank || 'N/A'}</td>
                 <td>${programCounts.programsSolved || 0}</td>
                 <td><span class="medal-gold">${medals.gold || 0}</span></td>
@@ -340,13 +375,14 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                 <td><span class="medal-bronze">${medals.bronze || 0}</span></td>
                 <td>${pointsCalculation.totalPoints || 0}</td>
                 <td>
+                <div style='display:flex;align-items:center'>
                     <a href="${user.skillRackURL}" target="_blank" class="btn btn-sm btn-outline-primary">
                         <i class="bi bi-box-arrow-up-right"></i>
                     </a>
                     <button class="btn btn-sm btn-info load-skillrack-btn" data-reg="${user.registerNumber}">
                         <i class="bi bi-arrow-repeat rotLoader" id="data-${user.registerNumber}"></i>
                     </button>
-                    
+                </div>
                 </td>
             `;
             tbody.appendChild(row);
@@ -395,7 +431,9 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                         if (filteredIndex !== -1) {
                             filteredUsersData[filteredIndex] = data;
                         }
+                        storeLocal(allUsersData);
                     }
+
                     
                     if (dataContainer) {
                         const skillRackData = data.skillRackData;

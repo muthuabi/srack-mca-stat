@@ -94,6 +94,10 @@
             color: white;
             font-size: 0.9em;
         }
+        .stat-box p
+        {
+            margin-bottom: 0.3rem;
+        }
 /*     New Styles   */
      /* .user-card {
             background: white;

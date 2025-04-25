@@ -23,13 +23,19 @@ async function extractSkillRackData(url) {
     const html = response.data;
     const dom = new JSDOM(html);
     const document = dom.window.document;
-
+    
+    const resumeStatus=document.querySelector('.ui-outputpanel.ui-widget')?.textContent.trim();
     // Extract basic info
+    // console.log(resumeStatus);
+    if(resumeStatus?.includes("resume not found"))
+    {
+        return null;
+    }
     const name = document.querySelector('.ui.big.label.black')?.textContent.trim() || 'N/A';
-    const registerNumber = document.querySelector('.ui.twelve.wide.column')?.textContent.match(/\d{16}/)?.[0] || 'N/A';
+    const registerNumber = document.querySelector('.ui.four.wide.center.aligned.column')?.textContent.match(/\d{16}/)?.[0] || 'N/A';
     const program = document.querySelector('.ui.large.label')?.textContent.trim() || 'N/A';
-    const college = document.querySelector('.ui.twelve.wide.column')?.textContent.includes('Thiagarajar College of Engineering (TCE), Madurai') ? 'Thiagarajar College of Engineering (TCE), Madurai' : 'N/A';
-    const year = document.querySelector('.ui.twelve.wide.column')?.textContent.match(/\(.*?\)\s*(\d{4})/)?.[1] || 'N/A';
+    const college = document.querySelector('.ui.four.wide.center.aligned.column')?.textContent.includes('Thiagarajar College of Engineering (TCE), Madurai') ? 'Thiagarajar College of Engineering (TCE), Madurai' : 'N/A';
+    const year = document.querySelector('.ui.four.wide.center.aligned.column')?.textContent.match(/\(.*?\)\s*(\d{4})/)?.[1] || 'N/A';
     const gender = document.querySelector('.ui.fourteen.wide.left.aligned.column')?.textContent.trim() || 'N/A';
 
     // Extract programming summary
@@ -74,7 +80,8 @@ async function extractSkillRackData(url) {
         program,
         college,
         year,
-        gender
+        gender,
+        skillRackURL:`${url}`
       },
       programmingSummary: {
         rank,
@@ -100,11 +107,13 @@ async function extractSkillRackData(url) {
         dc: `${dc} x 2 = ${dcPoints}`,
         dt: `${dt} x 20 = ${dtPoints}`,
         codeTest: `${codeTest} x 30 = ${codeTestPoints}`,
-        totalPoints: `${totalPoints} (${percentage}%)`
+        totalPoints: `${totalPoints} (${percentage}%)`,
+        points:totalPoints,
+        percentage
       }
     };
   } catch (error) {
-    console.error('Error extracting data:', error);
+    // console.error('Error extracting data:', error);
     return null;
   }
 }
@@ -112,6 +121,26 @@ async function extractSkillRackData(url) {
 app.get('/api/users', (req, res) => {
   res.json(users);
 });
+
+app.get('/api/user/srack-url/', async (req, res) => {
+  try {
+    const srackURL=atob(req.query.url);
+    if(!srackURL)
+      return res.status(400).send({message:"URL Not Provided",error:"URL Invalid"});
+    const skillRackData = await extractSkillRackData(srackURL);
+    if (!skillRackData) {
+      return res.status(500).json({ error: 'Failed to fetch SkillRack data' });
+    }
+    
+    res.json({
+      skillRackData
+    });
+  } catch (error) {
+    // console.error('Error:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 
 app.get('/api/user/:registerNumber', async (req, res) => {
   const registerNumber = req.params.registerNumber;
@@ -132,10 +161,11 @@ app.get('/api/user/:registerNumber', async (req, res) => {
       skillRackData
     });
   } catch (error) {
-    console.error('Error:', error);
+    // console.error('Error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 app.get('/api/all-users-data', async (req, res) => {
   try {
@@ -150,7 +180,7 @@ app.get('/api/all-users-data', async (req, res) => {
         });
         await delay(1000);
       } catch (error) {
-        console.error(`Error processing user ${user.registerNumber}:`, error);
+        // console.error(`Error processing user ${user.registerNumber}:`, error);
         allUsersData.push({
           user,
           skillRackData: null,
@@ -161,16 +191,22 @@ app.get('/api/all-users-data', async (req, res) => {
     
     res.json(allUsersData);
   } catch (error) {
-    console.error('Error:', error);
+    // console.error('Error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-
-// Serve the main HTML file for all other routes
+app.get('/srack-track', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'srack-url-stat.html'));
+});
+// Serve the main HTML file for / route
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+app.use((req,res,next)=>{
+
+    res.redirect("/srack-track");
+});
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
