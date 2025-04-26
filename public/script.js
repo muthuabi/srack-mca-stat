@@ -275,7 +275,7 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                                     <div class="accordion-body">
                                          <div class="stat-box">
 
-                                            <h5><i class="bi bi-award"></i> Medals</h5>
+                                            <h5><i class="bi bi-pencil-square"></i> Calculation</h5>
                                             <p><strong>Code Tutor:</strong> ${skillRackData.pointsCalculation?.codeTutor || 0}</p>
                                             <p><strong>Code Track:</strong> ${skillRackData.pointsCalculation?.codeTrack || 0}</p>
                                             <p><strong>DC</strong> ${skillRackData.pointsCalculation?.dc || 0}</p>
