@@ -198,9 +198,12 @@ app.get('/api/all-users-data', async (req, res) => {
 app.get('/srack-track', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'srack-url-stat.html'));
 });
+app.get('/tce-mca-track', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 // Serve the main HTML file for / route
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.redirect('/tce-mca-track');
 });
 
 app.use((req,res,next)=>{
