@@ -340,13 +340,13 @@ document.getElementById('sortSelect').addEventListener('change', function() {
             <tr>
                 <th>Name</th>
                 <th>Reg No</th>
-                <th>Program</th>
-                <th>College</th>
-                <th>Rank</th>
+                <th class='not-important' >Program</th>
+                <th class='not-important' >College</th>
+                <th class='not-important' >Rank</th>
                 <th>Solved</th>
-                <th>Gold</th>
-                <th>Silver</th>
-                <th>Bronze</th>
+                <th class='not-important' >Gold</th>
+                <th class='not-important' >Silver</th>
+                <th class='not-important' >Bronze</th>
                 <th>Points</th>
                 <th>Actions</th>
             </tr>
@@ -367,15 +367,15 @@ document.getElementById('sortSelect').addEventListener('change', function() {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${basicInfo.name || 'N/A'}</td>
-                <td>${user.registerNumber}</td>
-                <td>${basicInfo.program || 'N/A'}</td>
-                <td style='white-space:nowrap;max-width:10px;overflow: hidden;
+                <td class='regno'>${user.registerNumber}</td>
+                <td class='not-important' >${basicInfo.program || 'N/A'}</td>
+                <td class='not-important' style='white-space:nowrap;max-width:10px;overflow: hidden;
   text-overflow: ellipsis;' title="${basicInfo.college || 'N/A'}">${basicInfo.college || 'N/A'}</td>
-                <td>${programmingSummary.rank || 'N/A'}</td>
+                <td class='not-important' >${programmingSummary.rank || 'N/A'}</td>
                 <td ${programCounts?.programsSolved>=2000 && "style='color:green'" }  >${programCounts.programsSolved || 0}</td>
-                <td><span class="medal-gold">${medals.gold || 0}</span></td>
-                <td><span class="medal-silver">${medals.silver || 0}</span></td>
-                <td><span class="medal-bronze">${medals.bronze || 0}</span></td>
+                <td class='not-important' ><span class="medal-gold">${medals.gold || 0}</span></td>
+                <td class='not-important' ><span class="medal-silver">${medals.silver || 0}</span></td>
+                <td class='not-important' ><span class="medal-bronze">${medals.bronze || 0}</span></td>
                 <td ${pointsCalculation?.points>=5000 && "style='color:green'" } >${pointsCalculation.totalPoints || 0}</td>
                 <td>
                 <div style='display:flex;align-items:center;gap:2px'>

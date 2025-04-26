@@ -98,3 +98,24 @@
         {
             margin-bottom: 0.3rem;
         }
+
+        @media (max-width:480px)
+        {
+            .not-important
+            {
+                display: none;
+            }
+            .regno
+            {
+              max-width: 4ch;
+              overflow: hidden;
+              direction: rtl;
+              white-space: nowrap;
+            }
+        }
+        @media print
+        {
+          thead {
+            display: table-header-group; /* SUPER IMPORTANT */
+          }
+        }
