@@ -41,7 +41,7 @@
             <h1 class="text-center mb-0">SkillRack Stat Viewer</h1>
          </div>
          <div class="card mb-4 main-container ">
-            <div class="card-header bg-primary text-white">
+            <div id='card-header'class="card-header  bg-primary text-white d-flex justify-content-between align-items-center">
                 <h3 class="mb-0">Individual User</h3>
             </div>
             <div class="px-3">
@@ -71,6 +71,8 @@
                const userContainer=document.getElementById("user-container");
                const userForm=document.getElementById("srack-url-form");
                const urlInput=document.getElementById("input-srack-url");
+               const clearSaveBtn=document.createElement("button");
+               const cardHead=document.getElementById("card-header");
                let URL;
                const loaderHTML=`   
                <div id="loadingIndicator" class="loading" style="display: flex;justify-content:center;width:100%;">
@@ -79,6 +81,14 @@
                     </div>
                     <p class="mt-2">Loading data...</p>
                 </div>`;
+                clearSaveBtn.addEventListener("click",(e)=>{
+                     if(localStorage.getItem("savedSrackURL"))
+                     {
+                        localStorage.removeItem("savedSrackURL");
+                        fetchSRackData();
+                     }
+
+                })
                function fetchSRackData(message="")
                {
                      URL=urlInput?.value || localStorage.getItem("savedSrackURL") || null;
@@ -109,7 +119,13 @@
                      console.log(URL);
                }
                if(localStorage.getItem("savedSrackURL"))
+               {
+                console.dir(clearSaveBtn);
+                  clearSaveBtn.className='btn btn-outline-light';
+                  clearSaveBtn.innerText='Clear Saved';
+                  cardHead.appendChild(clearSaveBtn);
                   fetchSRackData(`<span>Welcome Back!</span>`);
+               }
 
                userForm.addEventListener("submit",(e)=>{
                      e.preventDefault();

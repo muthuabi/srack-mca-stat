@@ -249,12 +249,14 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                         <div class="stats-container">
                             <div class="stat-box">
                                 <h5><i class="bi bi-code-square"></i> Programs Solved</h5>
-                                <p class="fs-4 fw-bold" ${skillRackData.programCounts?.programsSolved>=1000 && "style='color:green'" } >${skillRackData.programCounts?.programsSolved || 0}</p>
+                                <p class="fs-4 fw-bold" ${skillRackData.programCounts?.programsSolved>=2000 && "style='color:green'" } >${skillRackData.programCounts?.programsSolved || 0}</p>
+                                ${skillRackData.programCounts?.programsSolved>=2000?"<small style='color:blue'>Requirements Completed</small>":"<small style='color:red' >"+(2000-skillRackData.programCounts?.programsSolved)+" Programs Remaing </small>"}
                             </div>
                             
                             <div class="stat-box">
                                 <h5><i class="bi bi-graph-up"></i> Total Points</h5>
-                                <p class="fs-4 fw-bold" >${skillRackData.pointsCalculation?.totalPoints || 0}</p>
+                                <p class="fs-4 fw-bold" ${skillRackData.pointsCalculation?.points>=5000 && "style='color:green'" } >${skillRackData.pointsCalculation?.totalPoints || 0}</p>
+                                ${skillRackData.pointsCalculation?.points>=5000?"<small style='color:blue'>Requirements Completed</small>":"<small style='color:red' >"+(5000-skillRackData.pointsCalculation?.points)+" Points Remaining </small>"}
                             </div>
                         </div>
                         
@@ -369,17 +371,17 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                 <td style='white-space:nowrap;max-width:10px;overflow: hidden;
   text-overflow: ellipsis;' title="${basicInfo.college || 'N/A'}">${basicInfo.college || 'N/A'}</td>
                 <td>${programmingSummary.rank || 'N/A'}</td>
-                <td>${programCounts.programsSolved || 0}</td>
+                <td ${programCounts?.programsSolved>=2000 && "style='color:green'" }  >${programCounts.programsSolved || 0}</td>
                 <td><span class="medal-gold">${medals.gold || 0}</span></td>
                 <td><span class="medal-silver">${medals.silver || 0}</span></td>
                 <td><span class="medal-bronze">${medals.bronze || 0}</span></td>
-                <td>${pointsCalculation.totalPoints || 0}</td>
+                <td ${pointsCalculation?.points>=5000 && "style='color:green'" } >${pointsCalculation.totalPoints || 0}</td>
                 <td>
                 <div style='display:flex;align-items:center'>
                     <a href="${user.skillRackURL}" target="_blank" class="btn btn-sm btn-outline-primary">
                         <i class="bi bi-box-arrow-up-right"></i>
                     </a>
-                    <button class="btn btn-sm btn-info load-skillrack-btn" data-reg="${user.registerNumber}">
+                    <button title='Refresh Stats' class="btn btn-sm btn-info load-skillrack-btn" data-reg="${user.registerNumber}">
                         <i class="bi bi-arrow-repeat rotLoader" id="data-${user.registerNumber}"></i>
                     </button>
                 </div>

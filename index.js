@@ -204,8 +204,7 @@ app.get('/', (req, res) => {
 });
 
 app.use((req,res,next)=>{
-
-    res.redirect("/srack-track");
+    res.status(404).sendFile(path.join(__dirname, 'public', 'page-not-found.html'));
 });
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
