@@ -224,7 +224,7 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                         <div class="d-flex justify-content-between align-items-start">
                             <div>
                                 <h4>${skillRackData.basicInfo?.name || 'N/A'}</h4>
-                                <p class="text-muted"><strong>Reg No:</strong> ${user.registerNumber}</p>
+                                <p class="text-muted mb-1"><strong>Reg No:</strong> ${user.registerNumber}</p>
                             </div>
                             <span class="badge rank-badge">Rank: ${skillRackData.programmingSummary?.rank || 'N/A'}</span>
                          
@@ -241,10 +241,11 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                             <p class="mb-1"><strong>Year:</strong> ${skillRackData.basicInfo?.year || 'N/A'}</p>
                         </div>
                         
-                        <a href="${user.skillRackURL}" target="_blank" class="btn btn-sm btn-outline-primary mb-3">
+                        <a href="${user.skillRackURL}" target="_blank" class="btn btn-sm btn-outline-primary mb-1">
                             <i class="bi bi-box-arrow-up-right"></i> SkillRack Profile
                         </a>
-                        
+                                                <br/>
+                        <small class='text-primary'>* Constrainted with TCE Requirements</small>
                         <!-- Always visible important stats -->
                         <div class="stats-container">
                             <div class="stat-box">
@@ -377,12 +378,12 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                 <td><span class="medal-bronze">${medals.bronze || 0}</span></td>
                 <td ${pointsCalculation?.points>=5000 && "style='color:green'" } >${pointsCalculation.totalPoints || 0}</td>
                 <td>
-                <div style='display:flex;align-items:center'>
+                <div style='display:flex;align-items:center;gap:2px'>
                     <a href="${user.skillRackURL}" target="_blank" class="btn btn-sm btn-outline-primary">
                         <i class="bi bi-box-arrow-up-right"></i>
                     </a>
-                    <button title='Refresh Stats' class="btn btn-sm btn-info load-skillrack-btn" data-reg="${user.registerNumber}">
-                        <i class="bi bi-arrow-repeat rotLoader" id="data-${user.registerNumber}"></i>
+                    <button title='Refresh Stats' id="data-${user.registerNumber}" class="btn rotLoader btn-sm btn-primary load-skillrack-btn" data-reg="${user.registerNumber}">
+                        <i class="bi bi-arrow-repeat rotLoader" ></i>
                     </button>
                 </div>
                 </td>
@@ -456,7 +457,7 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                         if(dataContainer.classList.contains("rotLoader"))
                             dataContainer.innerHTML="<small>Failed</small>";
                         else
-                        dataContainer.innerHTML = '<div class="alert alert-danger">Failed to load SkillRack data</div>';
+                        dataContainer.innerHTML = '<small class="text-danger">Failed to load SkillRack Stat data</small>';
                     }
                 }
             })
@@ -465,7 +466,7 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                     if(dataContainer.classList.contains("rotLoader"))
                         dataContainer.innerHTML="<small>Error</small>";
                     else
-                    dataContainer.innerHTML = '<div class="alert alert-danger">Error loading data</div>';
+                    dataContainer.innerHTML = '<small class="text-danger">Error loading Stat data</small>';
                 }
                 console.error('Error:', error);
             });
