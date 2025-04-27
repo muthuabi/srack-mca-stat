@@ -6,11 +6,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
     const searchBtn = document.getElementById('searchBtn');
     const viewToggle = document.getElementById('viewToggle');
-    
+    const statUpdateTime=document.getElementById('stat-updatedAt');
     let currentView = 'table'; // 'cards' or 'table'
     let allUsersData = []; // This will store all loaded data
     let filteredUsersData = []; // This will store filtered data for searches
-    
+    const options = {
+                      weekday: 'long', 
+                      year: 'numeric',
+                      month: 'short',    
+                      day: '2-digit',    
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit',
+                      hour12: true       
+                    };
+    statUpdateTime.innerText=localStorage.getItem("lastUpdated") || "Unknown";
     // Initialize toggle switch
     viewToggle.addEventListener('change', function() {
         currentView = this.checked ? 'cards' : 'table';
@@ -124,11 +134,16 @@ document.getElementById('sortSelect').addEventListener('change', function() {
         localStorage.setItem("srack_data",btoa(JSON.stringify(userData)));
         }
     }
-
+    function storeUpdateTime()
+    {
+        const date=new Date();
+        localStorage.setItem("lastUpdated",date.toLocaleString("en-GB",options));
+        statUpdateTime.innerText=date.toLocaleString("en-GB",options);
+    }
     function fetchBasicUserData() {
         if(getLocal())
             return;
-        loadingIndicator.style.display = 'block';
+        loadingIndicator.style.display = 'flex';
         usersContainer.style.display='none';
         fetch('/api/users')
             .then(response => response.json())
@@ -150,13 +165,14 @@ document.getElementById('sortSelect').addEventListener('change', function() {
     }
     
     function fetchAllSkillRackData() {
-        loadingIndicator.style.display = 'block';
+        loadingIndicator.style.display = 'flex';
         usersContainer.style.display='none';
         fetch('/api/all-users-data')
             .then(response => response.json())
             .then(data => {
                 allUsersData = data;
                 storeLocal(allUsersData);
+                storeUpdateTime();
                 filteredUsersData = [...allUsersData];
                 updateView();
             })
@@ -179,6 +195,7 @@ document.getElementById('sortSelect').addEventListener('change', function() {
             tableView.style.display = 'block';
             displayTable(filteredUsersData);
         }
+        
     }
     
     function displayUsers(usersData) {
@@ -189,7 +206,7 @@ document.getElementById('sortSelect').addEventListener('change', function() {
             return;
         }
         
-        usersData.forEach(item => {
+        usersData.forEach((item,index) => {
             const user = item.user || item;
             const skillRackData = item.skillRackData;
             
@@ -348,14 +365,14 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                 <th class='not-important' >Silver</th>
                 <th class='not-important' >Bronze</th>
                 <th>Points</th>
-                <th>Actions</th>
+                <th class='not-print'>Actions</th>
             </tr>
         `;
         
         // Table body
         const tbody = document.createElement('tbody');
         
-        usersData.forEach(item => {
+        usersData.forEach((item,index) => {
             const user = item.user || item;
             const skillRackData = item.skillRackData || {};
             const basicInfo = skillRackData.basicInfo || {};
@@ -366,8 +383,9 @@ document.getElementById('sortSelect').addEventListener('change', function() {
             
             const row = document.createElement('tr');
             row.innerHTML = `
-                <td>${basicInfo.name || 'N/A'}</td>
-                <td class='regno'>${user.registerNumber}</td>
+                <!--<td class='d-flex gap-2' style="text-align:'right'"><strong>#${index+1}</strong> <span>${basicInfo.name || 'N/A'}</span></td>-->
+                <td style='text-transform:uppercase'>${basicInfo.name || 'N/A'}</td>
+                <td class='regno' >${user.registerNumber}</td>
                 <td class='not-important' >${basicInfo.program || 'N/A'}</td>
                 <td class='not-important' style='white-space:nowrap;max-width:10px;overflow: hidden;
   text-overflow: ellipsis;' title="${basicInfo.college || 'N/A'}">${basicInfo.college || 'N/A'}</td>
@@ -377,7 +395,7 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                 <td class='not-important' ><span class="medal-silver">${medals.silver || 0}</span></td>
                 <td class='not-important' ><span class="medal-bronze">${medals.bronze || 0}</span></td>
                 <td ${pointsCalculation?.points>=5000 && "style='color:green'" } >${pointsCalculation.totalPoints || 0}</td>
-                <td>
+                <td class='not-print'>
                 <div style='display:flex;align-items:center;gap:2px'>
                     <a href="${user.skillRackURL}" target="_blank" class="btn btn-sm btn-outline-primary">
                         <i class="bi bi-box-arrow-up-right"></i>

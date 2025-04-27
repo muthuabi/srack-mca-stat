@@ -26,12 +26,12 @@
         
         <div class="card mb-4">
             <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h3 class="mb-0">All Users</h3>
+                <h3 class="mb-0">MCA 2024-2026 (TCE)</h3>
                 <a href='/srack-track' class='btn btn-outline-light'>Individual Tracking</a>
             </div>
             <div class="card-body">
-                <div class="d-flex justify-content-between mb-3 flex-wrap">
-                    <button id="loadAllBtn" class="btn btn-primary mb-2">
+                <div class="d-flex justify-content-between flex-wrap">
+                    <button id="loadAllBtn" class="btn btn-primary mb-2 not-print">
                         <i class="bi bi-cloud-download"></i> Load Current Stats
                     </button>
                     <div class="input-group mb-2" style="width: 300px;">
@@ -41,16 +41,22 @@
                         </button>
                     </div>
                 </div>
-                <div id="loadingIndicator" class="loading" style="display: none;">
+                <div style="padding-left:20px;">  
+                    <i>
+                    <small>As of </small>
+                    <small id="stat-updatedAt">Unknown</small>
+                    </i>
+                </div>
+                <div id="loadingIndicator" class="loading" style="display: none;flex-direction: column;align-items: center;">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Loading...</span>
                     </div>
                     <p class="mt-2">Loading data...</p>
                 </div>
-                <div id="usersContainer" class="row">
+                <div id="usersContainer" class="row" style="display: none;">
                     <!-- Cards will be inserted here -->
                 </div>
-                <div id="tableView" class="table-responsive" style="display: none;">
+                <div id="tableView" class="table-responsive" >
                     <!-- Table will be inserted here -->
                 </div>
             </div>

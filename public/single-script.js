@@ -4,14 +4,28 @@
                const urlInput=document.getElementById("input-srack-url");
                const clearSaveBtn=document.createElement("button");
                const cardHead=document.getElementById("card-header");
+               const statUpdateTime=document.getElementById('stat-updatedAt');
+               const statUpdateTimeContainer=document.getElementById('stat-updatedAt-Container');
+               const options = {
+                      weekday: 'long', 
+                      year: 'numeric',
+                      month: 'short',    
+                      day: '2-digit',    
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit',
+                      hour12: true       
+                    };
+               statUpdateTime.innerText=localStorage.getItem("lastUpdatedSingle") || "Unknown";
                let URL;
                const loaderHTML=`   
-               <div id="loadingIndicator" class="loading" style="display: flex;justify-content:center;width:100%;">
+               <div id="loadingIndicator" class="loading" style="display: flex;flex-direction:column;align-items:center;width:100%;">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Loading...</span>
                     </div>
                     <p class="mt-2">Loading data...</p>
                 </div>`;
+
                 clearSaveBtn.addEventListener("click",(e)=>{
                      if(localStorage.getItem("savedSrackURL"))
                      {
@@ -20,6 +34,13 @@
                      }
 
                 })
+                function storeUpdateTime()
+                {
+                    statUpdateTimeContainer.style.display='flex';
+                    const date=new Date();
+                    localStorage.setItem("lastUpdatedSingle",date.toLocaleString("en-GB",options));
+                    statUpdateTime.innerText=date.toLocaleString("en-GB",options);
+                }
                function fetchSRackData(message="")
                {
                      URL=urlInput?.value || localStorage.getItem("savedSrackURL") || null;
@@ -39,6 +60,7 @@
                         userContainer.innerHTML=getUserDataCard(data.skillRackData,message);
                         localStorage.setItem("savedSrackURL",URL);
                         document.getElementById("reload-stat").addEventListener("click",reloadStat);
+                        storeUpdateTime();
                      })
                      .catch(err=>{
                         // console.log(err);
