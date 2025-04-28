@@ -355,8 +355,9 @@ document.getElementById('sortSelect').addEventListener('change', function() {
         thead.className = 'table-light';
         thead.innerHTML = `
             <tr>
+                <th class='only-print'>S.No</th>
                 <th>Name</th>
-                <th>Reg No</th>
+                <th>Rno</th>
                 <th class='not-important' >Program</th>
                 <th class='not-important' >College</th>
                 <th class='not-important' >Rank</th>
@@ -384,6 +385,7 @@ document.getElementById('sortSelect').addEventListener('change', function() {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <!--<td class='d-flex gap-2' style="text-align:'right'"><strong>#${index+1}</strong> <span>${basicInfo.name || 'N/A'}</span></td>-->
+                <td class='only-print'>${index+1}</td>
                 <td style='text-transform:uppercase'>${basicInfo.name || 'N/A'}</td>
                 <td class='regno' >${user.registerNumber}</td>
                 <td class='not-important' >${basicInfo.program || 'N/A'}</td>

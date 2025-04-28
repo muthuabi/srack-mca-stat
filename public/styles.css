@@ -113,6 +113,7 @@
               white-space: nowrap;
             }
         }
+       
         @media print
         {
           thead {
@@ -126,6 +127,9 @@
             {
                 display: none;
             }
+       /*     .only-print{
+                  display: block;
+              }*/
             tr{
                 page-break-inside: avoid;
             }
