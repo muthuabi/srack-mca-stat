@@ -119,7 +119,10 @@
           thead {
             display: table-header-group; /* SUPER IMPORTANT */
             }
-           .not-important
+            .table-responsive{
+             font-size:small;
+             }
+            .not-important
             {
                 display: none;
             }
