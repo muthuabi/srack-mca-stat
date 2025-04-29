@@ -16,7 +16,7 @@ const users=JSON.parse(decrypted);
 function delay(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
-
+let err=null;
 async function extractSkillRackData(url) {
   try {
     const response = await axios.get(url);
@@ -114,6 +114,7 @@ async function extractSkillRackData(url) {
     };
   } catch (error) {
     // console.error('Error extracting data:', error);
+    err=error;
     return null;
   }
 }
@@ -153,7 +154,7 @@ app.get('/api/user/:registerNumber', async (req, res) => {
   try {
     const skillRackData = await extractSkillRackData(user.skillRackURL);
     if (!skillRackData) {
-      return res.status(500).json({ error: 'Failed to fetch SkillRack data' });
+      return res.status(500).json({ error: 'Failed to fetch SkillRack data',err });
     }
     
     res.json({
@@ -162,7 +163,7 @@ app.get('/api/user/:registerNumber', async (req, res) => {
     });
   } catch (error) {
     // console.error('Error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error',err });
   }
 });
 
