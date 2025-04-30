@@ -112,16 +112,16 @@
               direction: rtl;
               white-space: nowrap;
             }
+            .table-responsive{
+             font-size:small;
+             }
         }
        
         @media print
         {
-          thead {
+            thead {
             display: table-header-group; /* SUPER IMPORTANT */
             }
-            .table-responsive{
-             font-size:small;
-             }
             .not-important
             {
                 display: none;
@@ -135,6 +135,10 @@
                   display: block;
               }*/
             tr{
+                page-break-inside: avoid;
+            }
+            .user-card-col
+            {
                 page-break-inside: avoid;
             }
         }

@@ -211,7 +211,7 @@ document.getElementById('sortSelect').addEventListener('change', function() {
             const skillRackData = item.skillRackData;
             
             const userCard = document.createElement('div');
-            userCard.className = 'col-md-6 col-lg-6';
+            userCard.className = 'col-md-6 col-lg-6 user-card-col';
             
             if (!skillRackData) {
                 userCard.innerHTML = `
