@@ -131,6 +131,15 @@
        
         @media print
         {
+            /* Page Margin Control not working */
+            @page{
+                margin:0!important;
+                padding:0!important;
+            }
+            html,body {
+                margin: 0!important;
+                padding:0!important;
+            }
             thead {
             display: table-header-group; /* SUPER IMPORTANT */
             }
@@ -140,7 +149,7 @@
             }
             .not-print
             {
-                display: none;
+                display: none!important;
             }
             /*     
              .only-print{
