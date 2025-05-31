@@ -1,16 +1,20 @@
 const now = new Date();
-const date = now.toISOString().slice(0, 10);
-document.title=`SKILLRACK DATA VIEWER - ${date}`;
+const date = now.toLocaleDateString('en-CA'); // YYYY-MM-DD in local time
+document.title = `SKILLRACK DATA VIEWER - ${date}`;
+
 window.onbeforeprint = () => {
   const now = new Date();
-  const date = now.toISOString().slice(0, 10);
-  const time = now.toTimeString().slice(0, 5).replace(":", "-"); // HH-MM
+  const date = now.toLocaleDateString('en-CA'); // Local date
+  const time = now.toTimeString().slice(0, 5).replace(":", "-"); // HH-MM in local time
   document.title = `MCA_SRACK_DATA_${date}_${time}`;
 };
 
 window.onafterprint = () => {
+  const now = new Date();
+  const date = now.toLocaleDateString('en-CA');
   document.title = `SKILLRACK DATA VIEWER - ${date}`;
 };
+
 
 document.addEventListener('DOMContentLoaded', function() {
     const usersContainer = document.getElementById('usersContainer');
@@ -467,7 +471,7 @@ function storeLocal(userData) {
   text-overflow: ellipsis;' title="${basicInfo.college || 'N/A'}">${basicInfo.college || 'N/A'}</td>
                 <td class='not-important' >${programmingSummary.rank || 'N/A'}</td>
                 <td ${programCounts?.programsSolved>=2000 && "style='color:green'" }  >${programCounts.programsSolved || 0}
-                            <div class="progress not-print" style="height: 2px;">
+                            <div class="progress" style="height: 2px;">
                                 <div class="progress-bar ${programCounts?.programsSolved >= 2000 ? 'bg-success' : 'bg-danger'}"
                                      style="width: ${programsPercent}%">
                                 </div>
@@ -477,7 +481,7 @@ function storeLocal(userData) {
                 <td class='not-important' ><span class="text-secondary">${programCounts?.dc || 0}</span></td>
                 <td class='not-important' ><span class="text-secondary">${programCounts?.dt || 0}</span></td>
                 <td ${pointsCalculation?.points>=5000 && "style='color:green'" } >${pointsCalculation.totalPoints || 0}
-                            <div class="progress not-print" style="height: 2px;">
+                            <div class="progress" style="height: 2px;">
                                 <div class="progress-bar ${pointsCalculation?.points >= 5000 ? 'bg-success' : 'bg-danger'}"
                                      style="width: ${pointsPercent}%">
                                 </div>
