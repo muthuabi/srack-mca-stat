@@ -142,6 +142,93 @@ app.get('/api/user/srack-url/', async (req, res) => {
   }
 });
 
+app.post('/api/stat/save-stat-file', (req, res) => {
+    const encFilePath = path.join(__dirname, 'data/stat-file.enc');
+    const today = new Date().toISOString().split('T')[0];
+    const newData = req.body.data;
+
+    const CIPHER_KEY = process.env.CIPHER_KEY;
+
+    let stats = {};
+
+    try {
+        if (fs.existsSync(encFilePath)) {
+            const encryptedContent = fs.readFileSync(encFilePath, 'utf8');
+            const decrypted = CryptoJS.AES.decrypt(encryptedContent, CIPHER_KEY).toString(CryptoJS.enc.Utf8);
+            stats = JSON.parse(decrypted || '{}');
+        }
+    } catch (err) {
+        console.error("Decryption failed:", err);
+        return res.status(500).send('Failed to decrypt previous stats.');
+    }
+
+    stats[today] = newData;
+
+    try {
+        const stringified = JSON.stringify(stats, null, 2);
+        const encrypted = CryptoJS.AES.encrypt(stringified, CIPHER_KEY).toString();
+        fs.writeFileSync(encFilePath, encrypted);
+        res.send('Stat saved for ' + today);
+    } catch (err) {
+        console.error("Encryption failed:", err);
+        res.status(500).send('Failed to save encrypted stat.');
+    }
+});
+app.get('/api/stat/get-stat-file', (req, res) => {
+    const encFilePath = path.join(__dirname, 'data/stat-file.enc');
+    const CIPHER_KEY = process.env.CIPHER_KEY;
+    const date = req.query.date; // optional
+
+    if (!fs.existsSync(encFilePath)) {
+        return res.status(404).json({
+            success: false,
+            data: null,
+            message: "Stat file not found",
+            err: "FileMissing"
+        });
+    }
+
+    try {
+        const encrypted = fs.readFileSync(encFilePath, 'utf8');
+        const decrypted = CryptoJS.AES.decrypt(encrypted, CIPHER_KEY).toString(CryptoJS.enc.Utf8);
+        const stats = JSON.parse(decrypted || '{}');
+//         console.log(stats);
+        if (date) {
+            if (!stats[date]) {
+                return res.status(404).json({
+                    success: false,
+                    data: null,
+                    message: "No data found for the given date",
+                    err: "DateNotFound"
+                });
+            }
+            return res.status(200).json({
+                success: true,
+                data: { date, stats: stats[date] },
+                message: "Data fetched successfully",
+                err: null
+            });
+        }
+
+        // No date provided: return all stats
+        return res.status(200).json({
+            success: true,
+            data: stats,
+            message: "All stats fetched successfully",
+            err: null
+        });
+
+    } catch (err) {
+        console.error("Failed to decrypt or parse stats:", err);
+        return res.status(500).json({
+            success: false,
+            data: null,
+            message: "Error reading encrypted stats",
+            err: err.message
+        });
+    }
+});
+
 
 app.get('/api/user/:registerNumber', async (req, res) => {
   const registerNumber = req.params.registerNumber;
@@ -201,6 +288,9 @@ app.get('/srack-track', (req, res) => {
 });
 app.get('/tce-mca-track', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+app.get('/tce-mca-history', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'srack-history-data.html'));
 });
 // Serve the main HTML file for / route
 app.get('/', (req, res) => {

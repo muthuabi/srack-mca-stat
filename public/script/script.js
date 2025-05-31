@@ -11,14 +11,14 @@ document.addEventListener('DOMContentLoaded', function() {
     let allUsersData = []; // This will store all loaded data
     let filteredUsersData = []; // This will store filtered data for searches
     const options = {
-                      weekday: 'long', 
+                      weekday: 'long',
                       year: 'numeric',
-                      month: 'short',    
-                      day: '2-digit',    
+                      month: 'short',
+                      day: '2-digit',
                       hour: '2-digit',
                       minute: '2-digit',
                       second: '2-digit',
-                      hour12: true       
+                      hour12: true
                     };
     statUpdateTime.innerText=localStorage.getItem("lastUpdated") || "Unknown";
     // Initialize toggle switch
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
         currentView = this.checked ? 'cards' : 'table';
         updateView();
     });
-    
+
     // Add sort dropdown
     const sortContainer = document.createElement('div');
     sortContainer.className = 'mb-3';
@@ -43,14 +43,14 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     `;
     loadAllBtn.parentNode.insertBefore(sortContainer, loadAllBtn);
-    
+
     // Add key listener for search
     searchInput.addEventListener('keyup', function(e) {
         if (e.key === 'Enter' || !e.target.value.trim() ) {
             searchBtn.click();
         }
     });
-    
+
 // Sort functionality
 document.getElementById('sortSelect').addEventListener('change', function() {
     const sortValue = this.value;
@@ -65,38 +65,38 @@ document.getElementById('sortSelect').addEventListener('change', function() {
             let aValue, bValue;
             if (field === "points") {
                 // More robust points calculation access
-                aValue = (typeof aData.pointsCalculation === 'object' && aData.pointsCalculation !== null) 
-                    ? (aData.pointsCalculation.points || 0) 
+                aValue = (typeof aData.pointsCalculation === 'object' && aData.pointsCalculation !== null)
+                    ? (aData.pointsCalculation.points || 0)
                     : 0;
-                bValue = (typeof bData.pointsCalculation === 'object' && bData.pointsCalculation !== null) 
-                    ? (bData.pointsCalculation.points || 0) 
+                bValue = (typeof bData.pointsCalculation === 'object' && bData.pointsCalculation !== null)
+                    ? (bData.pointsCalculation.points || 0)
                     : 0;
             } else { // count
                 // More robust program counts access
-                aValue = (typeof aData.programCounts === 'object' && aData.programCounts !== null) 
-                    ? (aData.programCounts.programsSolved || 0) 
+                aValue = (typeof aData.programCounts === 'object' && aData.programCounts !== null)
+                    ? (aData.programCounts.programsSolved || 0)
                     : 0;
-                bValue = (typeof bData.programCounts === 'object' && bData.programCounts !== null) 
-                    ? (bData.programCounts.programsSolved || 0) 
+                bValue = (typeof bData.programCounts === 'object' && bData.programCounts !== null)
+                    ? (bData.programCounts.programsSolved || 0)
                     : 0;
             }
-            
+
             // console.log(`Sorting: aValue=${aValue}, bValue=${bValue}, field=${field}, order=${order}`);
-            
+
             return order === 'desc' ? bValue - aValue : aValue - bValue;
         });
     }
     updateView();
 });
-    
+
     // Load all users initially (but don't load SkillRack data yet)
     fetchBasicUserData();
-    
+
     // Load all SkillRack data (only when this button is clicked)
     loadAllBtn.addEventListener('click', function() {
         fetchAllSkillRackData();
     });
-    
+
     // Search functionality (now works on already loaded data)
     searchBtn.addEventListener('click', function() {
         const searchTerm = searchInput.value.toLowerCase().trim();
@@ -106,9 +106,9 @@ document.getElementById('sortSelect').addEventListener('change', function() {
             filteredUsersData = allUsersData.filter(item => {
                 const user = item.user || item;
                 return (
-                    user.registerNumber.toLowerCase().includes(searchTerm) || 
+                    user.registerNumber.toLowerCase().includes(searchTerm) ||
                     (user.email && user.email.toLowerCase().includes(searchTerm)) ||
-                    (item.skillRackData?.basicInfo?.name && 
+                    (item.skillRackData?.basicInfo?.name &&
                      item.skillRackData.basicInfo.name.toLowerCase().includes(searchTerm))
                 );
             });
@@ -126,14 +126,59 @@ document.getElementById('sortSelect').addEventListener('change', function() {
         return true;
 
     }
-    function storeLocal(userData)
-    {
-        if(userData)
-        {
-        // console.log("Local Set");
-        localStorage.setItem("srack_data",btoa(JSON.stringify(userData)));
+//     function storeLocal(userData)
+//     {
+//         if(userData)
+//         {
+//         // console.log("Local Set");
+//         localStorage.setItem("srack_data",btoa(JSON.stringify(userData)));
+//         }
+//     }
+
+function storeLocal(userData) {
+    if (userData) {
+        try {
+            // Save to localStorage
+            localStorage.setItem("srack_data", btoa(JSON.stringify(userData)));
+
+            // Prepare data for server-side saving
+            const today = new Date().toISOString().split('T')[0];
+            const payload = {
+                data: userData.reduce((acc, item) => {
+                    const regNo = item.user?.registerNumber || item.registerNumber;
+                    if (regNo) {
+                        acc[regNo] = item.skillRackData || item;
+                    }
+                    return acc;
+                }, {})
+            };
+
+            // Save to server
+            fetch('/api/stat/save-stat-file', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.text();
+            })
+            .then(result => {
+                console.log('Server save successful:', result);
+            })
+            .catch(error => {
+                console.error('Error saving to server:', error);
+            });
+
+        } catch (error) {
+            console.error('Error in storeLocal:', error);
         }
     }
+}
     function storeUpdateTime()
     {
         const date=new Date();
@@ -149,7 +194,7 @@ document.getElementById('sortSelect').addEventListener('change', function() {
             .then(response => response.json())
             .then(users => {
                 // Initialize with basic user data (no SkillRack data yet)
-                
+
                 allUsersData = users.map(user => ({ user }));
                 storeLocal(allUsersData);
                 filteredUsersData = [...allUsersData];
@@ -163,7 +208,7 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                 usersContainer.style.display='flex';
             });
     }
-    
+
     function fetchAllSkillRackData() {
         loadingIndicator.style.display = 'flex';
         usersContainer.style.display='none';
@@ -184,7 +229,7 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                  usersContainer.style.display='flex';
             });
     }
-    
+
     function updateView() {
         if (currentView === 'cards') {
             tableView.style.display = 'none';
@@ -195,24 +240,24 @@ document.getElementById('sortSelect').addEventListener('change', function() {
             tableView.style.display = 'block';
             displayTable(filteredUsersData);
         }
-        
+
     }
-    
+
     function displayUsers(usersData) {
         usersContainer.innerHTML = '';
-        
+
         if (usersData.length === 0) {
             usersContainer.innerHTML = '<div class="col-12 text-center py-4"><p>No users found</p></div>';
             return;
         }
-        
+
         usersData.forEach((item,index) => {
             const user = item.user || item;
             const skillRackData = item.skillRackData;
-            
+
             const userCard = document.createElement('div');
             userCard.className = 'col-md-6 col-lg-6 user-card-col';
-            
+
             if (!skillRackData) {
                 userCard.innerHTML = `
                     <div class="user-card">
@@ -235,7 +280,7 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                         languagesHTML += `<span class="badge bg-secondary badge-language">${lang.toUpperCase()}: ${count}</span>`;
                     }
                 }
-                
+
                 userCard.innerHTML = `
                     <div class="user-card">
                         <div class="d-flex justify-content-between align-items-start">
@@ -244,7 +289,7 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                                 <p class="text-muted mb-1"><strong>Reg No:</strong> ${user.registerNumber}</p>
                             </div>
                             <span class="badge rank-badge">Rank: ${skillRackData.programmingSummary?.rank || 'N/A'}</span>
-                         
+
                         </div>
                         <button title="refresh" class="btn btn-sm btn-info mt-2 load-skillrack-btn" data-reg="${user.registerNumber}">
                             <i class="bi bi-arrow-repeat"></i>
@@ -257,7 +302,7 @@ document.getElementById('sortSelect').addEventListener('change', function() {
   text-overflow: ellipsis;' title="${skillRackData.basicInfo.college || 'N/A'}" ><strong>College: </strong>${skillRackData.basicInfo?.college || 'N/A'}</p>
                             <p class="mb-1"><strong>Year:</strong> ${skillRackData.basicInfo?.year || 'N/A'}</p>
                         </div>
-                        
+
                         <a href="${user.skillRackURL}" target="_blank" class="btn btn-sm btn-outline-primary mb-1">
                             <i class="bi bi-box-arrow-up-right"></i> SkillRack Profile
                         </a>
@@ -268,27 +313,40 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                             <div class="stat-box">
                                 <h5><i class="bi bi-code-square"></i> Programs Solved</h5>
                                 <p class="fs-4 fw-bold" ${skillRackData.programCounts?.programsSolved>=2000 && "style='color:green'" } >${skillRackData.programCounts?.programsSolved || 0}</p>
-                                ${skillRackData.programCounts?.programsSolved>=2000?"<small style='color:blue'>Requirements Completed</small>":"<small style='color:red' >"+(2000-skillRackData.programCounts?.programsSolved)+" Programs Remaing </small>"}
+
+                            <div class="progress not-print" style="height: 2px;">
+                                <div class="progress-bar ${skillRackData.programCounts?.programsSolved >= 2000 ? 'bg-success' : 'bg-danger'}"
+                                     style="width: ${Math.min(100,((skillRackData.programCounts?.programsSolved||0)/2000)*100)}%"></div>
                             </div>
-                            
+
+                                ${skillRackData.programCounts?.programsSolved>=2000?"<small style='color:blue'>Requirements Completed</small>":"<small style='color:red' >"+(2000-skillRackData.programCounts?.programsSolved)+" Programs Remaing </small>"}
+
+                            </div>
+
                             <div class="stat-box">
                                 <h5><i class="bi bi-graph-up"></i> Total Points</h5>
                                 <p class="fs-4 fw-bold" ${skillRackData.pointsCalculation?.points>=5000 && "style='color:green'" } >${skillRackData.pointsCalculation?.totalPoints || 0}</p>
+
+                            <div class="progress not-print" style="height: 2px;">
+                                <div class="progress-bar ${skillRackData.pointsCalculation?.points >= 5000 ? 'bg-success' : 'bg-danger'}"
+                                     style="width: ${Math.min(100,((skillRackData.pointsCalculation?.points ||0)/5000)*100)}%"></div>
+                            </div>
+
                                 ${skillRackData.pointsCalculation?.points>=5000?"<small style='color:blue'>Requirements Completed</small>":"<small style='color:red' >"+(5000-skillRackData.pointsCalculation?.points)+" Points Remaining </small>"}
                             </div>
                         </div>
-                        
+
                         <!-- Accordion for additional details -->
                         <div class="accordion mt-3" id="accordion-${user.registerNumber}">
                             <div class="accordion-item">
                                 <h2 class="accordion-header">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" 
-                                        data-bs-target="#collapse-${user.registerNumber}" aria-expanded="false" 
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapse-${user.registerNumber}" aria-expanded="false"
                                         aria-controls="collapse-${user.registerNumber}">
                                         Show Details
                                     </button>
                                 </h2>
-                                <div id="collapse-${user.registerNumber}" class="accordion-collapse collapse" 
+                                <div id="collapse-${user.registerNumber}" class="accordion-collapse collapse"
                                     data-bs-parent="#accordion-${user.registerNumber}">
                                     <div class="accordion-body">
                                          <div class="stat-box">
@@ -307,14 +365,14 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                                             <p><i class="bi bi-trophy-fill medal-silver"></i> <strong>Silver:</strong> ${skillRackData.programmingSummary?.medals?.silver || 0}</p>
                                             <p><i class="bi bi-trophy-fill medal-bronze"></i> <strong>Bronze:</strong> ${skillRackData.programmingSummary?.medals?.bronze || 0}</p>
                                         </div>
-                                        
+
                                         <div class="stat-box">
                                             <h5><i class="bi bi-code-slash"></i> Program Types</h5>
                                             <p><strong>Code Test:</strong> ${skillRackData.programCounts?.codeTest || 0}</p>
                                             <p><strong>Code Track:</strong> ${skillRackData.programCounts?.codeTrack || 0}</p>
                                             <p><strong>Code Tutor:</strong> ${skillRackData.programCounts?.codeTutor || 0}</p>
                                         </div>
-                                        
+
                                         <div class="stat-box">
                                             <h5><i class="bi bi-filetype-js"></i> Languages</h5>
                                             ${languagesHTML || '<p>No language data</p>'}
@@ -326,10 +384,10 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                     </div>
                 `;
             }
-            
+
             usersContainer.appendChild(userCard);
         });
-        
+
         // Add event listeners to the load buttons
         document.querySelectorAll('.load-skillrack-btn').forEach(button => {
             button.addEventListener('click', function() {
@@ -338,18 +396,18 @@ document.getElementById('sortSelect').addEventListener('change', function() {
             });
         });
     }
-    
+
     function displayTable(usersData) {
         tableView.innerHTML = '';
-        
+
         if (usersData.length === 0) {
             tableView.innerHTML = '<div class="text-center py-4"><p>No users found</p></div>';
             return;
         }
-        
+
         const table = document.createElement('table');
         table.className = 'table table-hover align-middle';
-        
+
         // Table header
         const thead = document.createElement('thead');
         thead.className = 'table-light';
@@ -362,17 +420,17 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                 <th class='not-important' >College</th>
                 <th class='not-important' >Rank</th>
                 <th>Solved</th>
-                <th class='not-important' >Gold</th>
-                <th class='not-important' >Silver</th>
-                <th class='not-important' >Bronze</th>
+                <th class='not-important' >Tracks</th>
+                <th class='not-important' >DC</th>
+                <th class='not-important' >DT</th>
                 <th>Points</th>
                 <th class='not-print'>Actions</th>
             </tr>
         `;
-        
+
         // Table body
         const tbody = document.createElement('tbody');
-        
+
         usersData.forEach((item,index) => {
             const user = item.user || item;
             const skillRackData = item.skillRackData || {};
@@ -381,7 +439,8 @@ document.getElementById('sortSelect').addEventListener('change', function() {
             const medals = programmingSummary.medals || {};
             const programCounts = skillRackData.programCounts || {};
             const pointsCalculation = skillRackData.pointsCalculation || {};
-            
+            const programsPercent = Math.min(100, ((programCounts?.programsSolved || 0) / 2000) * 100);
+            const pointsPercent = Math.min(100, ((pointsCalculation?.points || 0) / 5000) * 100);
             const row = document.createElement('tr');
             row.innerHTML = `
                 <!--<td class='d-flex gap-2' style="text-align:'right'"><strong>#${index+1}</strong> <span>${basicInfo.name || 'N/A'}</span></td>-->
@@ -392,11 +451,23 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                 <td class='not-important' style='white-space:nowrap;max-width:10px;overflow: hidden;
   text-overflow: ellipsis;' title="${basicInfo.college || 'N/A'}">${basicInfo.college || 'N/A'}</td>
                 <td class='not-important' >${programmingSummary.rank || 'N/A'}</td>
-                <td ${programCounts?.programsSolved>=2000 && "style='color:green'" }  >${programCounts.programsSolved || 0}</td>
-                <td class='not-important' ><span class="medal-gold">${medals.gold || 0}</span></td>
-                <td class='not-important' ><span class="medal-silver">${medals.silver || 0}</span></td>
-                <td class='not-important' ><span class="medal-bronze">${medals.bronze || 0}</span></td>
-                <td ${pointsCalculation?.points>=5000 && "style='color:green'" } >${pointsCalculation.totalPoints || 0}</td>
+                <td ${programCounts?.programsSolved>=2000 && "style='color:green'" }  >${programCounts.programsSolved || 0}
+                            <div class="progress not-print" style="height: 2px;">
+                                <div class="progress-bar ${programCounts?.programsSolved >= 2000 ? 'bg-success' : 'bg-danger'}"
+                                     style="width: ${programsPercent}%">
+                                </div>
+                            </div>
+                </td>
+                <td class='not-important' ><span class="text-secondary">${programCounts?.codeTrack || 0}</span></td>
+                <td class='not-important' ><span class="text-secondary">${programCounts?.dc || 0}</span></td>
+                <td class='not-important' ><span class="text-secondary">${programCounts?.dt || 0}</span></td>
+                <td ${pointsCalculation?.points>=5000 && "style='color:green'" } >${pointsCalculation.totalPoints || 0}
+                            <div class="progress not-print" style="height: 2px;">
+                                <div class="progress-bar ${pointsCalculation?.points >= 5000 ? 'bg-success' : 'bg-danger'}"
+                                     style="width: ${pointsPercent}%">
+                                </div>
+                            </div>
+                </td>
                 <td class='not-print'>
                 <div style='display:flex;align-items:center;gap:2px'>
                     <a href="${user.skillRackURL}" target="_blank" class="btn btn-sm btn-outline-primary">
@@ -410,11 +481,11 @@ document.getElementById('sortSelect').addEventListener('change', function() {
             `;
             tbody.appendChild(row);
         });
-        
+
         table.appendChild(thead);
         table.appendChild(tbody);
         tableView.appendChild(table);
-        
+
         // Add event listeners to the load buttons in table
         document.querySelectorAll('.load-skillrack-btn').forEach(button => {
             button.addEventListener('click', function() {
@@ -423,7 +494,7 @@ document.getElementById('sortSelect').addEventListener('change', function() {
             });
         });
     }
-    
+
     function fetchSingleSkillRackData(registerNumber) {
         const dataContainer = document.querySelector(`#data-${registerNumber}`);
         if (dataContainer) {
@@ -433,22 +504,22 @@ document.getElementById('sortSelect').addEventListener('change', function() {
             else
             dataContainer.innerHTML = '<p>Loading data...</p>';
         }
-        
+
         fetch(`/api/user/${registerNumber}`)
             .then(response => response.json())
             .then(data => {
                 if (data.skillRackData) {
                     // Update the data in our stored array
-                    const index = allUsersData.findIndex(item => 
-                        (item.user?.registerNumber === registerNumber) || 
+                    const index = allUsersData.findIndex(item =>
+                        (item.user?.registerNumber === registerNumber) ||
                         (item.registerNumber === registerNumber)
                     );
-                    
+
                     if (index !== -1) {
                         allUsersData[index] = data;
                         // Update filtered data if this user is in it
-                        const filteredIndex = filteredUsersData.findIndex(item => 
-                            (item.user?.registerNumber === registerNumber) || 
+                        const filteredIndex = filteredUsersData.findIndex(item =>
+                            (item.user?.registerNumber === registerNumber) ||
                             (item.registerNumber === registerNumber)
                         );
                         if (filteredIndex !== -1) {
@@ -457,7 +528,7 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                         storeLocal(allUsersData);
                     }
 
-                    
+
                     if (dataContainer) {
                         const skillRackData = data.skillRackData;
                         dataContainer.innerHTML = `
@@ -469,7 +540,7 @@ document.getElementById('sortSelect').addEventListener('change', function() {
                             </div>
                         `;
                     }
-                    
+
                     // Refresh the view to show updated data
                     updateView();
                 } else {

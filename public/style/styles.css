@@ -1,0 +1,145 @@
+/* Old Styles */
+        @keyframes anime-rotate {
+            from{
+                transform: rotate(0);
+            }
+            to{
+                transform: rotate(360deg);
+            }
+        }
+        .rotate{
+            animation: anime-rotate infinite;
+        }
+        .user-card {
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 5px;
+            padding: 15px;
+            transition: transform 0.3s ease;
+        }
+        .user-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        .stats-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 5px;
+        }
+        .stat-box {
+            border: 1px solid #eee;
+            padding: 10px;
+            border-radius: 5px;
+            min-width: 200px;
+            width:100%;
+        }
+        
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+        }
+        .points-calculation {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .view-toggle {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .toggle-label {
+            margin: 0 10px;
+            font-weight: 500;
+        }
+        
+        .form-switch .form-check-input {
+            width: 3em;
+            height: 1.5em;
+        }
+        
+        .table-responsive {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 10px;
+        }
+        
+        .badge-language {
+            font-size: 0.85em;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        
+        .medal-gold {
+            color: #ffd700;
+        }
+        
+        .medal-silver {
+            color: #c0c0c0;
+        }
+        
+        .medal-bronze {
+            color: #cd7f32;
+        }
+        
+        .rank-badge {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: white;
+            font-size: 0.9em;
+        }
+        .stat-box p
+        {
+            margin-bottom: 0.3rem;
+        }
+
+        @media (max-width:480px)
+        {
+            .not-important
+            {
+                display: none;
+            }
+            .regno
+            {
+              max-width: 4ch;
+              overflow: hidden;
+              direction: rtl;
+              white-space: nowrap;
+            }
+            .table-responsive{
+             font-size:small;
+             }
+        }
+       
+        @media print
+        {
+            thead {
+            display: table-header-group; /* SUPER IMPORTANT */
+            }
+            .not-important
+            {
+                display: none;
+            }
+            .not-print
+            {
+                display: none;
+            }
+            /*     
+             .only-print{
+                  display: block;
+              }*/
+            tr{
+                page-break-inside: avoid;
+            }
+            .user-card-col
+            {
+                page-break-inside: avoid;
+            }
+        }
