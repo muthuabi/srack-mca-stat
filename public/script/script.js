@@ -1,32 +1,16 @@
-const originalTitle = document.title;
-
-function updatePrintTitle() {
+const now = new Date();
+const date = now.toISOString().slice(0, 10);
+document.title=`SKILLRACK DATA VIEWER - ${date}`;
+window.onbeforeprint = () => {
   const now = new Date();
-  const date = now.toISOString().slice(0, 10); // YYYY-MM-DD
+  const date = now.toISOString().slice(0, 10);
   const time = now.toTimeString().slice(0, 5).replace(":", "-"); // HH-MM
-
-  document.title = `MCA_SRACK_DATE_${date}_${time}`;
-}
-
-function restoreTitle() {
-  document.title = originalTitle;
-}
-
-// Desktop support
-window.onbeforeprint = updatePrintTitle;
-window.onafterprint = restoreTitle;
-
-// Mobile support: Override window.print
-const nativePrint = window.print;
-window.print = function () {
-  updatePrintTitle();
-  setTimeout(() => {
-    nativePrint();
-    // Restore title after printing — delay to allow print dialog to finish
-    setTimeout(restoreTitle, 1500);
-  }, 100);
+  document.title = `MCA_SRACK_DATA_${date}_${time}`;
 };
 
+window.onafterprint = () => {
+  document.title = `SKILLRACK DATA VIEWER - ${date}`;
+};
 
 document.addEventListener('DOMContentLoaded', function() {
     const usersContainer = document.getElementById('usersContainer');
