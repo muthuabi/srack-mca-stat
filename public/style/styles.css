@@ -99,19 +99,30 @@
         {
             margin-bottom: 0.3rem;
         }
-
-        @media (max-width:480px)
+        .regno-short
+        {
+            display:none;
+        }
+        @media (max-width:580px)
         {
             .not-important
             {
                 display: none;
             }
-            .regno
+/*            .regno
             {
               max-width: 4ch;
               overflow: hidden;
               direction: rtl;
               white-space: nowrap;
+            }*/
+            .regno
+            {
+                display:none;
+            }
+            .regno-short
+            {
+                display:table-cell;
             }
             .table-responsive{
              font-size:small;

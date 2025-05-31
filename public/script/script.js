@@ -459,6 +459,7 @@ function storeLocal(userData) {
                 <td class='only-print'>${index+1}</td>
                 <td style='text-transform:uppercase'>${basicInfo.name || 'N/A'}</td>
                 <td class='regno' >${user.registerNumber}</td>
+                <td class='regno-short'>${user.registerNumber.slice(-4)}</td>
                 <td class='not-important' >${basicInfo.program || 'N/A'}</td>
                 <td class='not-important' style='white-space:nowrap;max-width:10px;overflow: hidden;
   text-overflow: ellipsis;' title="${basicInfo.college || 'N/A'}">${basicInfo.college || 'N/A'}</td>
