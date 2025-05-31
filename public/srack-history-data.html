@@ -103,18 +103,22 @@
         </div>
 
         <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
+            <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
                 <h3 class="mb-0">MCA 2024-2026 (TCE) - Historical Stats</h3>
+                <div class="d-flex flex-wrap gap-2 justify-content-end">
+                <a href='/srack-track' class='nav-link'>Track</a>
+                <a href='/' class='nav-link'>Home</a>
+                </div>
             </div>
             <div class="card-body">
                 <div class="d-flex justify-content-between flex-wrap gap-2 mb-3">
-                    <div class="input-group" style="width: 250px;">
+                    <div class="input-group"  style="display:flex;flex-direction:row;width: 250px;">
                         <input type="text" id="datePicker" class="form-control" placeholder="Select date">
                         <button class="btn btn-primary" id="loadDateBtn">
                             <i class="bi bi-calendar-check"></i> Load
                         </button>
                     </div>
-                    <div class="input-group" style="width: 300px;">
+                    <div class="input-group" style="width: 300px;height:fit-content">
                         <input type="text" id="searchInput" class="form-control" placeholder="Search by name or reg no">
                         <button class="btn btn-outline-primary" id="searchBtn">
                             <i class="bi bi-search"></i> Search
@@ -124,7 +128,7 @@
 
                 <div id="dateInfo" style="padding-left:20px;">
                     <i>
-                    <small>Showing data for: </small>
+                    <small>(Saved) Last Loaded data for: </small>
                     <small id="selectedDate">No date selected</small>
                     </i>
                 </div>
@@ -182,7 +186,7 @@
 
             // Add sort dropdown
             const sortContainer = document.createElement('div');
-            sortContainer.className = 'mb-3';
+            sortContainer.className = 'mt-2';
             sortContainer.innerHTML = `
                 <div class="input-group" style="width: 250px;">
                     <label class="input-group-text" for="sortSelect">Sort By</label>
@@ -195,7 +199,7 @@
                     </select>
                 </div>
             `;
-            loadDateBtn.parentNode.insertBefore(sortContainer, loadDateBtn);
+            loadDateBtn.parentNode.append(sortContainer);
 
             // Add key listener for search
             searchInput.addEventListener('keyup', function(e) {
@@ -274,6 +278,7 @@
                         } else {
                             allUsersData = [];
                             filteredUsersData = [];
+                            selectedDateElement.textContent="NA";
                             noDataMessage.style.display = 'block';
                             usersContainer.style.display = 'none';
                             tableView.style.display = 'none';
@@ -281,6 +286,7 @@
                     })
                     .catch(error => {
                         console.error('Error:', error);
+                        selectedDateElement.textContent="NA";
                         noDataMessage.style.display = 'block';
                         usersContainer.style.display = 'none';
                         tableView.style.display = 'none';
@@ -316,7 +322,7 @@
 
                 usersData.forEach((user, index) => {
                     const userCard = document.createElement('div');
-                    userCard.className = 'col-md-6 col-lg-4 user-card-col';
+                    userCard.className = 'col-md-6 col-lg-6 user-card-col';
 
                     // Create language badges if available
                     let languagesHTML = '';
@@ -359,7 +365,7 @@
                                     <p class="fs-4 fw-bold" ${programsSolved >= 2000 ? "style='color:green'" : ""}>
                                         ${programsSolved}
                                     </p>
-                                    <div class="progress">
+                                    <div class="progress" style="height: 5px;">
                                         <div class="progress-bar ${programsSolved >= 2000 ? 'bg-success' : 'bg-danger'}"
                                              role="progressbar" style="width: ${programsPercent}%"
                                              aria-valuenow="${programsSolved}" aria-valuemin="0" aria-valuemax="2000">
@@ -375,7 +381,7 @@
                                     <p class="fs-4 fw-bold" ${points >= 5000 ? "style='color:green'" : ""}>
                                         ${points}
                                     </p>
-                                    <div class="progress">
+                                    <div class="progress" style="height: 5px;">
                                         <div class="progress-bar ${points >= 5000 ? 'bg-success' : 'bg-danger'}"
                                              role="progressbar" style="width: ${pointsPercent}%"
                                              aria-valuenow="${points}" aria-valuemin="0" aria-valuemax="5000">
@@ -491,7 +497,7 @@
                         <td class='not-important'>${user.programmingSummary.rank || 'N/A'}</td>
                         <td ${programsSolved >= 2000 ? "style='color:green'" : ""}>
                             ${programsSolved}
-                            <div class="progress not-print" style="height: 5px;">
+                            <div class="progress not-print" style="height: 3px;">
                                 <div class="progress-bar ${programsSolved >= 2000 ? 'bg-success' : 'bg-danger'}"
                                      style="width: ${programsPercent}%">
                                 </div>
@@ -502,15 +508,15 @@
                         <td class='not-important'><span class="text-secondary">${user.programCounts.dt || 0}</span></td>
                         <td ${points >= 5000 ? "style='color:green'" : ""}>
                             ${points}
-                            <div class="progress not-print" style="height: 5px;">
+                            <div class="progress not-print" style="height: 3px;">
                                 <div class="progress-bar ${points >= 5000 ? 'bg-success' : 'bg-danger'}"
                                      style="width: ${pointsPercent}%">
                                 </div>
                             </div>
                         </td>
                         <td class='not-print'>
-                            <small>Programs: ${programsPercent.toFixed(1)}%</small><br>
-                            <small>Points: ${pointsPercent.toFixed(1)}%</small>
+                            <small>${programsPercent.toFixed(1)}%</small><br>
+                            <small>${pointsPercent.toFixed(1)}%</small>
                         </td>
                     `;
                     tbody.appendChild(row);
