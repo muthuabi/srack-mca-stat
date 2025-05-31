@@ -236,7 +236,7 @@
                     return;
                 }
 
-                const formattedDate = selectedDate.toISOString().split('T')[0];
+                const formattedDate = selectedDate.toLocaleDateString('en-CA');
                 fetchHistoricalData(formattedDate);
             });
 

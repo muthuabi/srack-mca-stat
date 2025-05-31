@@ -161,10 +161,8 @@ app.post('/api/stat/save-stat-file', (req, res) => {
         console.error("Decryption failed:", err);
         return res.status(500).send('Failed to decrypt previous stats.');
     }
-
-    stats[today] = newData;
-
     try {
+        stats[today] = newData;
         const stringified = JSON.stringify(stats, null, 2);
         const encrypted = CryptoJS.AES.encrypt(stringified, CIPHER_KEY).toString();
         fs.writeFileSync(encFilePath, encrypted);
