@@ -1,3 +1,15 @@
+window.onbeforeprint = () => {
+  const now = new Date();
+  const date = now.toISOString().slice(0, 10);
+  const time = now.toTimeString().slice(0, 5).replace(":", "-"); // HH-MM
+
+  document.title = `MCA_SRACK_DATA_${date}_${time}`;
+};
+
+window.onafterprint = () => {
+  document.title = 'SkillRack Data Viewer';
+};
+
 document.addEventListener('DOMContentLoaded', function() {
     const usersContainer = document.getElementById('usersContainer');
     const tableView = document.getElementById('tableView');
