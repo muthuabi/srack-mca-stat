@@ -144,7 +144,7 @@ app.get('/api/user/srack-url/', async (req, res) => {
 
 app.post('/api/stat/save-stat-file', (req, res) => {
     const encFilePath = path.join(__dirname, 'data/stat-file.enc');
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toLocaleDateString('en-CA');;
     const newData = req.body.data;
 
     const CIPHER_KEY = process.env.CIPHER_KEY;

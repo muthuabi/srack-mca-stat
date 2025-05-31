@@ -160,7 +160,7 @@ function storeLocal(userData) {
             localStorage.setItem("srack_data", btoa(JSON.stringify(userData)));
 
             // Prepare data for server-side saving
-            const today = new Date().toISOString().split('T')[0];
+            const today = new Date().toLocaleDateString('en-CA');
             const payload = {
                 data: userData.reduce((acc, item) => {
                     const regNo = item.user?.registerNumber || item.registerNumber;
